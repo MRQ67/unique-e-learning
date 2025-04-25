@@ -1,15 +1,12 @@
 'use client';
-
-import Link from "next/link";
+import Link from 'next/link';
 import NavbarHome from '@/components/NavbarHome';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { BookOpen, BarChart2, Video as VideoIcon } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { VelocityScroll } from "@/components/magicui/scroll-based-velocity";  
-import { LineShadowText } from "@/components/magicui/line-shadow-text";  
 
-export default function Home() {
+export default function HomeContent() {
   return (
     <main className="flex flex-col min-h-screen">
       {/* Navigation */}
@@ -20,12 +17,10 @@ export default function Home() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
-        className="mt-16 relative bg-gradient-to-r from-[#3E7B27] to-[#85A947] text-[#EFE3C2] py-24 px-6 text-center"
+        className="relative bg-gradient-to-r from-[#3E7B27] to-[#85A947] text-[#EFE3C2] py-24 px-6 text-center"
       >
         <div className="max-w-2xl mx-auto space-y-6">
-          <h1 className="text-5xl font-extrabold">
-            Empower Your <LineShadowText>Learning Journey</LineShadowText>
-          </h1>
+          <h1 className="text-5xl font-extrabold">Empower Your Learning Journey</h1>
           <p className="text-lg">Interactive courses, quizzes, and progress tracking to help you learn effectively.</p>
           <div className="flex justify-center gap-4 mt-4">
             <Link href="/auth/register">
@@ -89,18 +84,13 @@ export default function Home() {
 
       <footer className="py-8 px-6 bg-[#123524] text-[#EFE3C2] mt-auto">
         <div className="max-w-5xl mx-auto flex flex-col md:flex-row justify-between items-center">
-          <div className="flex flex-col items-start">
-            <div>{new Date().getFullYear()} Unique E-Learning. All rights reserved.</div>
-          </div>
+          <div>{new Date().getFullYear()} Unique E-Learning. All rights reserved.</div>
           <div className="flex space-x-4 mt-4 md:mt-0">
             <Link href="/about" className="hover:text-[#85A947]">About</Link>
             <Link href="/contact" className="hover:text-[#85A947]">Contact</Link>
           </div>
         </div>
       </footer>
-      <div className="py-8 px-6 bg-[#123524] text-[#EFE3C2] flex flex-col items-center space-y-4">  
-        <VelocityScroll>Unique E-Learning</VelocityScroll>  
-      </div>
     </main>
   );
 }

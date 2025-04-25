@@ -1,0 +1,127 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Account {
+  id                 String   @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?
+  access_token       String?
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?
+  session_state      String?
+  oauth_token_secret String?
+  oauth_token        String?
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("accounts")
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("sessions")
+}
+
+model User {
+  id             String    @id @default(cuid())
+  name           String?
+  email          String?   @unique
+  emailVerified  DateTime?
+  image          String?
+  hashedPassword String?
+  role           Role      @default(STUDENT)
+  accounts       Account[]
+  sessions       Session[]
+  passwordResetTokens PasswordResetToken[]
+  courses        Course[]
+
+  @@map("users")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@map("verification_tokens")
+}
+
+// Model for password reset tokens
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  expires   DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Course {
+  id           String   @id @default(cuid())
+  title        String
+  description  String
+  instructorId String
+  duration     Int      // in minutes
+  createdAt    DateTime @default(now())
+
+  instructor User @relation(fields: [instructorId], references: [id])
+  modules     Module[]    // related modules of the course
+}
+
+model Module {
+  id        String    @id @default(cuid())
+  title     String
+  order     Int       // ordering of modules
+  courseId  String
+  contents  Content[] // items within the module
+
+  course    Course    @relation(fields: [courseId], references: [id])
+}
+
+model Content {
+  id        String      @id @default(cuid())
+  moduleId  String
+  type      ContentType
+  title     String      // title or description of the item
+  url       String      // link or file path
+  meetingId String?
+  joinUrl   String?
+  startTime DateTime?
+  duration  Int?
+  order     Int         // ordering within module
+
+  module    Module      @relation(fields: [moduleId], references: [id])
+}
+
+// Types of content items within modules
+enum ContentType {
+  VIDEO
+  PDF
+  LIVE
+  QUIZ
+  ASSIGNMENT
+}
+
+enum Role {
+  ADMIN
+  INSTRUCTOR
+  STUDENT
+}
