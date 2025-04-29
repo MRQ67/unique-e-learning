@@ -1,6 +1,6 @@
 import prisma from "@/lib/prismadb";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 import CourseCatalogue, { CourseWithInstructor } from "@/components/CourseCatalogue";
 import Navbar from "@/components/Navbar";
 import { redirect } from "next/navigation";
