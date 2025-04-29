@@ -26,7 +26,6 @@ export default async function InstructorDashboardPage() {
     return redirect('/dashboard/student');
   }
 
-  // @ts-ignore Prisma client needs regeneration for Exam model
   const examsList = await (prisma as any).exam.findMany({ where: { instructorId: session.user.id } });
 
   return (
