@@ -2,7 +2,9 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prismadb";
 import bcrypt from "bcrypt";
 
-export async function POST(request: Request, { params: { token } }: { params: { token: string } }) {
+export async function POST(request: Request) {
+  const url = new URL(request.url);
+  const token = url.pathname.split('/').pop()!;
   const { newPassword } = await request.json();
   if (!newPassword) {
     return NextResponse.json({ message: "Missing new password" }, { status: 400 });
