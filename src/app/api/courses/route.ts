@@ -14,7 +14,7 @@ export async function POST(req: Request) {
   
   // Get the authenticated user from the session
   const { getServerSession } = await import('next-auth/next');
-  const { authOptions } = await import('@/app/api/auth/[...nextauth]/route');
+  const { authOptions } = await import('@/lib/auth');
   const session = await getServerSession(authOptions);
   
   if (!session || !session.user) {
