@@ -6,8 +6,8 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 // import toast from 'sonner'; (unused)
 import CourseProgress from "@/components/CourseProgress";
-import QuizEngine, { type QuizQuestion } from "../../../components/QuizEngine";
 import { CourseWithInstructor } from "@/components/CourseCatalogue";
+import Link from 'next/link';
 
 export const dynamic = "force-dynamic";
 
@@ -38,10 +38,7 @@ export default async function CoursePage({ params }: { params: Promise<{ id: str
     );
   }
 
-  const sampleQuestions: QuizQuestion[] = [
-    { id: 'q1', type: 'multiple-choice', question: 'What is 2+2?', options: ['1','2','3','4'], answer: '4', timeLimit: 30 },
-    { id: 'q2', type: 'short-answer', question: 'What color is the sky?', answer: 'blue', timeLimit: 20 },
-  ];
+
 
   return (
     <>
@@ -93,7 +90,11 @@ export default async function CoursePage({ params }: { params: Promise<{ id: str
                         {ct.type === 'LIVE' && (
                           <Button asChild variant="default" className="mt-2"><a href={ct.joinUrl} target="_blank" rel="noopener noreferrer">Join Live Session</a></Button>
                         )}
-                        {!['VIDEO','PDF','LIVE'].includes(ct.type) && (
+                        {ct.type === 'QUIZ' ? (
+                          <Link href={`/courses/${id}/quiz?contentId=${ct.id}`}> 
+                            <Button className="mt-2">Start Secure Quiz</Button>
+                          </Link>
+                        ) : (
                           <Button asChild variant="link" className="mt-2"><a href={ct.url} target="_blank" rel="noopener noreferrer">Access Content</a></Button>
                         )}
                       </div>
@@ -105,7 +106,6 @@ export default async function CoursePage({ params }: { params: Promise<{ id: str
           ))}
         </Tabs>
         <CourseProgress modules={course.modules} />
-        <QuizEngine questions={sampleQuestions} />
       </div>
     </>
   );

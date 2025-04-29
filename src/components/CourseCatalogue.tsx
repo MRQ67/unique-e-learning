@@ -17,7 +17,7 @@ export interface CourseWithInstructor {
   instructor: { name: string | null };
 }
 
-export default function CourseCatalogue({ courses }: { courses: CourseWithInstructor[] }) {
+export default function CourseCatalogue({ courses, userRole }: { courses: CourseWithInstructor[], userRole?: string }) {
   const [search, setSearch] = useState('');
   const [instructorFilter, setInstructorFilter] = useState('all');
 
@@ -79,9 +79,11 @@ export default function CourseCatalogue({ courses }: { courses: CourseWithInstru
           </li>
         ))}
       </ul>
-      <div className="flex justify-center">
-        <CourseCreationModal />
-      </div>
+      {userRole !== 'STUDENT' && (
+        <div className="flex justify-center">
+          <CourseCreationModal />
+        </div>
+      )}
     </div>
   );
 }

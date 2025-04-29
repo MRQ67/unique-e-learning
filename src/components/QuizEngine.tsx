@@ -15,7 +15,7 @@ interface QuizEngineProps {
   questions: QuizQuestion[];
 }
 
-export default function QuizEngine({ questions }: QuizEngineProps) {
+export default function QuizEngine({ questions = [] }: QuizEngineProps) {
   const [current, setCurrent] = useState(0);
   const [selected, setSelected] = useState('');
   const [timer, setTimer] = useState(questions[0]?.timeLimit || 0);
@@ -27,7 +27,7 @@ export default function QuizEngine({ questions }: QuizEngineProps) {
     if (!questions.length) return;
     setSelected('');
     setFeedback(null);
-    setTimer(questions[current].timeLimit);
+    setTimer(questions[current]?.timeLimit || 30); // Default to 30 seconds if timeLimit is not defined
     const interval = setInterval(() => {
       setTimer((t) => {
         if (t <= 1) {
@@ -42,8 +42,10 @@ export default function QuizEngine({ questions }: QuizEngineProps) {
   }, [current, questions]);
 
   function submitAnswer() {
-    if (feedback) return;
+    if (feedback || !questions.length) return;
     const q = questions[current];
+    if (!q) return;
+    
     const isCorrect =
       q.type === 'multiple-choice'
         ? selected === q.answer

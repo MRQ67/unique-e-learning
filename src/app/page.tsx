@@ -9,7 +9,39 @@ import { motion } from 'framer-motion';
 import { VelocityScroll } from "@/components/magicui/scroll-based-velocity";  
 import { LineShadowText } from "@/components/magicui/line-shadow-text";  
 
+import React, { useState, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
+
+interface CourseType {
+  id: string;
+  title: string;
+  description: string;
+  duration: number;
+  category: string;
+  image?: string;
+  instructor: { name: string };
+}
+
 export default function Home() {
+  const [searchTerm, setSearchTerm] = useState('');
+  const { data: courses, isLoading } = useQuery<CourseType[]>({
+    queryKey: ['courses'],
+    queryFn: () => fetch('/api/courses').then(res => res.json()),
+  });
+  const filteredCourses = useMemo(() => {
+    if (!courses) return [];
+    return courses.filter(c => c.title.toLowerCase().includes(searchTerm.toLowerCase()) || c.category.toLowerCase().includes(searchTerm.toLowerCase()));
+  }, [courses, searchTerm]);
+  const featuredCourses = useMemo(() => filteredCourses.slice(0, 3), [filteredCourses]);
+  const categories = useMemo(() => (courses ? Array.from(new Set(courses.map(c => c.category))) : []), [courses]);
+  const instructors = [
+    { name: 'Jane Doe', expertise: 'Web Development', photo: 'https://source.unsplash.com/random/128x128?woman' },
+    { name: 'John Smith', expertise: 'Data Science', photo: 'https://source.unsplash.com/random/128x128?man' },
+    { name: 'Alice Johnson', expertise: 'UI/UX Design', photo: 'https://source.unsplash.com/random/128x128?designer' },
+  ];
+
+  if (isLoading) return <div className="flex justify-center p-8">Loading courses…</div>;
+
   return (
     <main className="flex flex-col min-h-screen">
       {/* Navigation */}
@@ -38,53 +70,88 @@ export default function Home() {
         </div>
       </motion.section>
 
-      {/* Features Section */}
+      {/* Featured Courses */}
       <section className="py-20 px-6 bg-[#EFE3C2]">
-        <h2 className="text-3xl font-bold text-[#123524] text-center mb-12">Features</h2>
+        <h2 className="text-3xl font-bold text-[#123524] text-center mb-8">Featured Courses</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0 }}>
-            <Card>
+          {featuredCourses.map(course => (
+            <Card key={course.id}>
+              <img src={course.image} alt={course.title} className="w-full h-48 object-cover rounded-t-lg" />
               <CardHeader>
-                <BookOpen className="text-[#3E7B27] size-6" />
-                <CardTitle className="text-[#3E7B27]">Interactive Courses</CardTitle>
-                <CardDescription className="text-[#123524]">Hands-on lessons with real-time feedback.</CardDescription>
+                <CardTitle>{course.title}</CardTitle>
+                <CardDescription>{course.description}</CardDescription>
               </CardHeader>
               <CardFooter>
-                <Link href="/courses">
-                  <Button variant="link" className="text-[#3E7B27]">Explore</Button>
+                <Link href={`/courses/${course.id}`}>
+                  <Button variant="link">View Course</Button>
                 </Link>
               </CardFooter>
             </Card>
-          </motion.div>
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.2 }}>
-            <Card>
-              <CardHeader>
-                <BarChart2 className="text-[#3E7B27] size-6" />
-                <CardTitle className="text-[#3E7B27]">Progress Tracking</CardTitle>
-                <CardDescription className="text-[#123524]">Stay motivated by visualizing your progress.</CardDescription>
-              </CardHeader>
-              <CardFooter>
-                <Link href="/dashboard">
-                  <Button variant="link" className="text-[#3E7B27]">View Dashboard</Button>
-                </Link>
-              </CardFooter>
-            </Card>
-          </motion.div>
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.4 }}>
-            <Card>
-              <CardHeader>
-                <VideoIcon className="text-[#3E7B27] size-6" />
-                <CardTitle className="text-[#3E7B27]">Live Sessions</CardTitle>
-                <CardDescription className="text-[#123524]">Schedule and join live webinars seamlessly.</CardDescription>
-              </CardHeader>
-              <CardFooter>
-                <Link href="/live">
-                  <Button variant="link" className="text-[#3E7B27]">Learn More</Button>
-                </Link>
-              </CardFooter>
-            </Card>
-          </motion.div>
+          ))}
         </div>
+      </section>
+
+      {/* Search Bar */}
+      <section className="py-12 px-6 bg-white">
+        <div className="max-w-xl mx-auto">
+          <input
+            type="text"
+            placeholder="Search courses..."
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+            className="w-full border border-gray-300 rounded-md p-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#3E7B27]"
+          />
+        </div>
+      </section>
+
+      {/* Value Proposition */}
+      <section className="py-12 px-6 bg-[#f7fafc]">
+        <div className="max-w-3xl mx-auto text-center space-y-4">
+          <p className="text-xl text-[#123524]">Flexible learning anytime, anywhere.</p>
+          <p className="text-xl text-[#123524]">Expert instructors from top universities.</p>
+          <p className="text-xl text-[#123524]">Hands-on projects and real-world examples.</p>
+        </div>
+      </section>
+
+      {/* Categories */}
+      <section className="py-12 px-6 bg-white">
+        <h2 className="text-3xl font-bold text-[#123524] text-center mb-8">Categories</h2>
+        <div className="flex justify-center flex-wrap gap-4">
+          {categories.map(cat => (
+            <button
+              key={cat}
+              onClick={() => setSearchTerm(cat)}
+              className="px-4 py-2 bg-[#85A947] text-white rounded-full"
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+      </section>
+
+      {/* Instructor Spotlight */}
+      <section className="py-20 px-6 bg-[#EFE3C2]">
+        <h2 className="text-3xl font-bold text-[#123524] text-center mb-8">Instructor Spotlight</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+          {instructors.map(inst => (
+            <div key={inst.name} className="flex flex-col items-center">
+              <img src={inst.photo} alt={inst.name} className="w-32 h-32 rounded-full object-cover" />
+              <h3 className="mt-4 text-lg font-medium">{inst.name}</h3>
+              <p className="text-gray-600">{inst.expertise}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Call-to-Action Banner */}
+      <section className="py-16 px-6 bg-[#3E7B27] text-[#EFE3C2] text-center">
+        <h2 className="text-3xl font-bold mb-4">Ready to dive in?</h2>
+        <p className="mb-6">Join now for a 7-day free trial and start learning today.</p>
+        <Link href="/auth/register">
+          <Button variant="default" className="bg-[#EFE3C2] text-[#123524] hover:bg-[#EFE3C2]/90">
+            Start Free Trial
+          </Button>
+        </Link>
       </section>
 
       <footer className="py-8 px-6 bg-[#123524] text-[#EFE3C2] mt-auto">
@@ -98,8 +165,9 @@ export default function Home() {
           </div>
         </div>
       </footer>
-      <div className="py-8 px-6 bg-[#123524] text-[#EFE3C2] flex flex-col items-center space-y-4">  
-        <VelocityScroll>Unique E-Learning</VelocityScroll>  
+
+      <div className="py-8 px-6 bg-[#123524] text-[#EFE3C2] flex flex-col items-center space-y-4">
+        <VelocityScroll>Unique E-Learning</VelocityScroll>
       </div>
     </main>
   );

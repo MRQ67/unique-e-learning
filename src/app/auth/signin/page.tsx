@@ -1,23 +1,22 @@
 'use client';
 import { useState } from 'react';
 import { signIn } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 export default function SignInPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const res = await signIn('credentials', { redirect: false, email, password });
-    if (res?.error) {
-      setError(res.error);
-    } else {
-      router.push('/dashboard');
-    }
+    setError(null);
+    // full redirect; NextAuth will set cookie and navigate to /dashboard
+    await signIn('credentials', {
+      email,
+      password,
+      callbackUrl: '/dashboard',
+    });
   };
 
   return (

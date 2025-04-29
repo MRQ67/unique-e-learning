@@ -52,6 +52,9 @@ model User {
   sessions       Session[]
   passwordResetTokens PasswordResetToken[]
   courses        Course[]
+  quizSessions   QuizSession[]
+  examSessions   ExamSession[]
+  exams          Exam[]
 
   @@map("users")
 }
@@ -81,8 +84,9 @@ model Course {
   instructorId String
   duration     Int      // in minutes
   createdAt    DateTime @default(now())
-
-  instructor User @relation(fields: [instructorId], references: [id])
+  category     String   @default("General")
+  image        String?
+  instructor   User   @relation(fields: [instructorId], references: [id])
   modules     Module[]    // related modules of the course
 }
 
@@ -107,8 +111,100 @@ model Content {
   startTime DateTime?
   duration  Int?
   order     Int         // ordering within module
-
+  requiresProctoring Boolean     @default(false)
+  quizSessions   QuizSession[]
+  questions      QuizQuestion[]
   module    Module      @relation(fields: [moduleId], references: [id])
+}
+
+// Tracks a user’s quiz session, including proctoring flags
+model QuizSession {
+  id                 String      @id @default(cuid())
+  contentId          String
+  userId             String
+  startedAt          DateTime    @default(now())
+  endedAt            DateTime?
+  requiresProctoring Boolean     @default(false)
+  proctoringActive   Boolean     @default(false)
+  events             QuizEvent[]
+  content            Content     @relation(fields: [contentId], references: [id])
+  user               User        @relation(fields: [userId], references: [id])
+}
+
+// Logs proctoring events (e.g., tab switches, face lost)
+model QuizEvent {
+  id         String      @id @default(cuid())
+  sessionId  String
+  type       String      // e.g. 'tab-switch', 'face-lost'
+  timestamp  DateTime    @default(now())
+  session    QuizSession @relation(fields: [sessionId], references: [id])
+}
+
+// Questions for QUIZ content items
+model QuizQuestion {
+  id            String   @id @default(cuid())
+  contentId     String
+  prompt        String
+  options       Json
+  correctOption Int
+  content       Content  @relation(fields: [contentId], references: [id])
+  @@map("quiz_questions")
+}
+
+// Standalone secure exams
+model Exam {
+  id          String          @id @default(cuid())
+  title       String
+  description String?
+  isSecure    Boolean         @default(true)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  instructorId String
+  instructor   User   @relation(fields: [instructorId], references: [id])
+  questions   ExamQuestion[]
+  sessions   ExamSession[]
+}
+
+model ExamQuestion {
+  id            String   @id @default(cuid())
+  examId        String
+  prompt        String
+  options       Json
+  correctOption Int
+  exam          Exam     @relation(fields: [examId], references: [id])
+  @@map("exam_questions")
+}
+
+// Tracks a user’s exam session for proctoring
+model ExamSession {
+  id                String        @id @default(cuid())
+  examId            String
+  userId            String
+  startedAt         DateTime      @default(now())
+  endedAt           DateTime?
+  requiresProctoring Boolean       @default(true)
+  proctoringActive  Boolean       @default(false)
+  completed         Boolean       @default(false)
+  answers           Json?         // Stores the user's answers as a JSON object
+  score             Float?        // Percentage score
+  events            ExamSessionEvent[]
+  
+  exam              Exam          @relation(fields: [examId], references: [id])
+  user              User          @relation(fields: [userId], references: [id])
+
+  @@map("exam_sessions")
+}
+
+model ExamSessionEvent {
+  id         String        @id @default(cuid())
+  sessionId  String
+  type       String
+  timestamp  DateTime      @default(now())
+  metadata   Json?         // Stores additional event data like WebRTC signals
+
+  session    ExamSession   @relation(fields: [sessionId], references: [id])
+
+  @@map("exam_session_events")
 }
 
 // Types of content items within modules
