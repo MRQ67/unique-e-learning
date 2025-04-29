@@ -12,10 +12,11 @@ export default function SignInPage() {
     e.preventDefault();
     setError(null);
     // full redirect; NextAuth will set cookie and navigate to /dashboard
+    const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
     await signIn('credentials', {
       email,
       password,
-      callbackUrl: '/dashboard',
+      callbackUrl: baseUrl ? `${baseUrl}/dashboard` : '/dashboard',
     });
   };
 

@@ -108,6 +108,10 @@ export default function SecureExamTaker({ examId, studentId }: SecureExamTakerPr
     
     try {
       // Setup webcam
+      if (typeof window === 'undefined' || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        alert('Webcam access is not supported in this environment. Please use a modern browser on your device.');
+        throw new Error('getUserMedia not supported');
+      }
       stream = await navigator.mediaDevices.getUserMedia({ 
         video: { width: 640, height: 480, facingMode: 'user' },
         audio: false
