@@ -29,21 +29,41 @@ export default function ProctorDashboard({ sessionId }: ProctorDashboardProps) {
   const router = useRouter();
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  const { data: session, isLoading, error } = useQuery<FullExamSession | null, Error>({
+  const { data: session, isLoading, error, isError } = useQuery<FullExamSession | null, Error>({
     queryKey: ['exam-session', sessionId] as const,
     queryFn: async () => {
-      const res = await fetch(`/api/examsessions?sessionId=${sessionId}`);
-      if (!res.ok) {
-        // If session not found (likely completed and deleted), redirect to dashboard
-        if (res.status === 404) {
-          router.push('/dashboard/instructor');
+      try {
+        const res = await fetch(`/api/examsessions?sessionId=${sessionId}`);
+        
+        // Handle session not found or other errors
+        if (!res.ok) {
+          if (res.status === 404) {
+            // Session was likely completed and deleted
+            console.log('Session not found, redirecting to dashboard');
+            setTimeout(() => router.push('/dashboard/instructor'), 2500);
+            return null;
+          }
+          throw new Error(`Failed to fetch session: ${res.statusText}`);
+        }
+        
+        const data = await res.json();
+        // If we get an empty response or error message
+        if (!data || data.error) {
+          console.log('Invalid session data received');
+          setTimeout(() => router.push('/dashboard/instructor'), 2500);
           return null;
         }
-        throw new Error('Failed to fetch session');
+        
+        return data as FullExamSession;
+      } catch (err) {
+        console.error('Error fetching session:', err);
+        setTimeout(() => router.push('/dashboard/instructor'), 2500);
+        throw err;
       }
-      return res.json() as Promise<FullExamSession>;
     },
     refetchInterval: 2000,
+    retry: 1, // Only retry once to avoid excessive retries on deleted sessions
+    refetchOnWindowFocus: true,
   });
   
   // Setup video stream connection when session is active
@@ -185,7 +205,27 @@ export default function ProctorDashboard({ sessionId }: ProctorDashboardProps) {
     }
   }, [session, sessionId, mutation]);
 
-  if (isLoading || !session) return <div className="p-4">Loading proctoring session...</div>;
+  // Handle various loading states
+  if (isLoading) {
+    return <div className="p-4 text-center">
+      <p>Loading proctoring session...</p>
+      <p className="text-sm text-muted-foreground mt-2">Please wait while we fetch the session data.</p>
+    </div>;
+  }
+
+  if (isError || !session) {
+    return <div className="p-4 text-center">
+      <p>Session not found or has been completed.</p>
+      <p className="text-sm text-muted-foreground mt-2">Redirecting to dashboard...</p>
+      <Button 
+        className="mt-4" 
+        onClick={() => router.push('/dashboard/instructor')}
+        variant="outline"
+      >
+        Return to Dashboard Now
+      </Button>
+    </div>;
+  }
 
   const { exam, user, events, proctoringActive } = session;
 
@@ -205,9 +245,7 @@ export default function ProctorDashboard({ sessionId }: ProctorDashboardProps) {
             className="w-64 h-48 bg-gray-900 rounded border border-gray-300" 
           />
           <div className="absolute inset-0 flex items-center justify-center">
-            <p className="text-white text-sm bg-black bg-opacity-50 p-1 rounded">
-              Student webcam feed
-            </p>
+            
           </div>
         </div>
       </div>

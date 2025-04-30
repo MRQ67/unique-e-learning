@@ -38,11 +38,21 @@ export async function POST(req: Request) {
       description,
       instructorId: session.user.id,
       questions: {
-        create: questions.map((q: any) => ({
-          prompt: q.prompt,
-          options: q.options,
-          correctOption: q.correctOption,
-        })),
+        create: questions.map((q: any) => {
+          const opts = Array.isArray(q.choices) ? q.choices.map((c: any) => c.text) : [];
+          const correct = Array.isArray(q.choices) ? q.choices.find((c: any) => c.correct) : undefined;
+          
+          // Find the index of the correct option
+          const correctIndex = correct 
+            ? opts.findIndex((opt: string) => opt === correct.text)
+            : 0; // Default to first option if no correct answer specified
+          
+          return {
+            prompt: q.label,
+            options: opts,
+            correctOption: correctIndex >= 0 ? correctIndex : 0, // Ensure it's a valid index
+          };
+        }),
       },
     },
     include: { questions: true },

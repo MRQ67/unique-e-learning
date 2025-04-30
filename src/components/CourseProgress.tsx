@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Progress } from '@/components/ui/progress';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { AnimatedCircularProgressBar } from '@/components/magicui/animated-circular-progress-bar';
 
 type Content = { id: string; order: number; title: string };
 type Module = { id: string; order: number; title: string; contents: Content[] };
@@ -32,7 +32,14 @@ export default function CourseProgress({ modules }: { modules: Module[] }) {
   return (
     <div className="space-y-4">
       <h2 className="text-2xl font-semibold">Progress</h2>
-      <Progress value={percent} className="w-full h-4" />
+      <AnimatedCircularProgressBar
+        value={percent}
+        max={100}
+        min={0}
+        gaugePrimaryColor="var(--primary)"
+        gaugeSecondaryColor="var(--muted)"
+        className="mx-auto"
+      />
       <p>{completed.length} of {total} lessons completed ({percent}%)</p>
       {percent === 100 && (
         <Alert>

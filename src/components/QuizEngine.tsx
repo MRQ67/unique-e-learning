@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 export type QuizQuestion = {
   id: string;
@@ -82,22 +83,19 @@ export default function QuizEngine({ questions = [] }: QuizEngineProps) {
       <p className="mb-2">Time left: {timer}s</p>
       <p className="mb-4">{q.question}</p>
       {q.type === 'multiple-choice' && q.options && (
-        <div className="space-y-2 mb-4">
+        <RadioGroup
+          value={selected}
+          onValueChange={(val) => setSelected(val)}
+          className="space-y-2 mb-4"
+          disabled={!!feedback}
+        >
           {q.options.map((opt) => (
-            <label key={opt} className="flex items-center">
-              <input
-                type="radio"
-                name="quiz"
-                value={opt}
-                checked={selected === opt}
-                onChange={() => setSelected(opt)}
-                className="mr-2"
-                disabled={!!feedback}
-              />
-              <span>{opt}</span>
-            </label>
+            <div key={opt} className="flex items-center">
+              <RadioGroupItem value={opt} />
+              <span className="ml-2">{opt}</span>
+            </div>
           ))}
-        </div>
+        </RadioGroup>
       )}
       {q.type === 'short-answer' && (
         <div className="mb-4">

@@ -15,8 +15,8 @@ export default function ExamCreationModal() {
         Create an Exam
       </button>
       {open && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white text-black rounded-lg shadow-lg w-full max-w-2xl p-6 relative overflow-y-auto max-h-full">
+        <div className="fixed inset-0 bg-white flex flex-col h-screen overflow-hidden z-50">
+          <div className="flex-1 overflow-auto relative">
             <button
               onClick={() => setOpen(false)}
               className="absolute top-4 right-4 text-black hover:text-gray-600 text-2xl"

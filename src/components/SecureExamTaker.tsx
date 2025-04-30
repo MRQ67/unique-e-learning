@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import {
   Card,
   CardHeader,
@@ -339,19 +340,18 @@ export default function SecureExamTaker({ examId, studentId }: SecureExamTakerPr
             <CardTitle>{`Q${idx + 1}: ${q.prompt}`}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-1">
-            {q.options.map((opt: any, oi: number) => (
-              <div key={oi} className="flex items-center">
-                <input
-                  id={`${q.id}-${oi}`}
-                  type="radio"
-                  name={q.id}
-                  checked={selected[q.id] === oi}
-                  onChange={() => handleSelect(q.id, oi)}
-                  className="mr-2"
-                />
-                <label htmlFor={`${q.id}-${oi}`}>{opt}</label>
-              </div>
-            ))}
+            <RadioGroup
+              value={selected[q.id]?.toString() || ''}
+              onValueChange={(val) => handleSelect(q.id, parseInt(val))}
+              className="space-y-2 mb-4"
+            >
+              {q.options.map((opt: any, oi: number) => (
+                <div key={oi} className="flex items-center">
+                  <RadioGroupItem value={oi.toString()} />
+                  <span className="ml-2">{opt}</span>
+                </div>
+              ))}
+            </RadioGroup>
           </CardContent>
         </Card>
       ))}

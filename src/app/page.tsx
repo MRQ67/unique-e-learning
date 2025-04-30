@@ -40,13 +40,10 @@ export default function Home() {
     { name: 'Alice Johnson', expertise: 'UI/UX Design', photo: 'https://source.unsplash.com/random/128x128?designer' },
   ];
 
-  if (isLoading) return <div className="flex justify-center p-8">Loading courses…</div>;
-
   return (
     <main className="flex flex-col min-h-screen">
       {/* Navigation */}
       <NavbarHome />
-
       {/* Hero Section */}
       <motion.section
         initial={{ opacity: 0, y: 20 }}
@@ -60,7 +57,7 @@ export default function Home() {
           </h1>
           <p className="text-lg">Interactive courses, quizzes, and progress tracking to help you learn effectively.</p>
           <div className="flex justify-center gap-4 mt-4">
-            <Link href="/auth/register">
+            <Link href="/auth">
               <Button variant="default" size="lg" className="bg-[#3E7B27] hover:bg-[#123524] text-[#EFE3C2]">Get Started</Button>
             </Link>
             <Link href="/courses">

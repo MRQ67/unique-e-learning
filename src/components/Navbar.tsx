@@ -5,6 +5,7 @@ import { signOut } from 'next-auth/react';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription, DialogClose } from '@/components/ui/dialog';
 
 export default function Navbar({ title }: { title: string }) {
   const username = 'User';
@@ -27,7 +28,23 @@ export default function Navbar({ title }: { title: string }) {
           <DropdownMenuItem asChild><Link href="/account">Account Setting</Link></DropdownMenuItem>
           <DropdownMenuItem asChild><Link href="/profile">Profile</Link></DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onSelect={() => signOut({ callbackUrl: '/' })}>Sign Out</DropdownMenuItem>
+          <Dialog>
+            <DialogTrigger asChild>
+              <DropdownMenuItem>Sign Out</DropdownMenuItem>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Confirm Sign Out</DialogTitle>
+                <DialogDescription>Are you sure you want to sign out?</DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <DialogClose asChild>
+                  <Button variant="outline">Cancel</Button>
+                </DialogClose>
+                <Button variant="destructive" onClick={() => signOut({ callbackUrl: '/' })}>Sign Out</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </DropdownMenuContent>
       </DropdownMenu>
     </nav>

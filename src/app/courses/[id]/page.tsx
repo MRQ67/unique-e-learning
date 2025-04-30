@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import CourseProgress from "@/components/CourseProgress";
 import { CourseWithInstructor } from "@/components/CourseCatalogue";
 import Link from 'next/link';
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 
 export const dynamic = "force-dynamic";
 
@@ -43,6 +44,15 @@ export default async function CoursePage({ params }: { params: Promise<{ id: str
   return (
     <>
       <Navbar title={course.title} />
+      <div className="mt-6">
+        <Breadcrumb
+          items={[
+            { href: "/", label: "Home" },
+            { href: "/courses", label: "Courses" },
+            { href: `/courses/${course.id}`, label: course.title },
+          ]}
+        />
+      </div>
       <div className="max-w-3xl mx-auto mt-20 px-4 space-y-6">
         <h1 className="text-3xl font-bold">{course.title}</h1>
         <p className="text-gray-700">{course.description}</p>
