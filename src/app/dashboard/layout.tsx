@@ -1,11 +1,19 @@
 "use client";
 import React from 'react';
 import { Sidebar } from '@/components/ui/sidebar';
+import { NavItem } from '@/components/ui/types';
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+interface DashboardLayoutProps {
+  children: React.ReactNode;
+  navItems: NavItem[];
+}
+
+export default function DashboardLayout({ children, navItems }: DashboardLayoutProps) {
   return (
     <div className="flex">
-      <Sidebar />
+      {navItems && (
+        <Sidebar navItems={navItems} />
+      )}
       <main className="flex-1">
         {children}
       </main>

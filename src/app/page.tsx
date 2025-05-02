@@ -35,9 +35,8 @@ export default function Home() {
   const featuredCourses = useMemo(() => filteredCourses.slice(0, 3), [filteredCourses]);
   const categories = useMemo(() => (courses ? Array.from(new Set(courses.map(c => c.category))) : []), [courses]);
   const instructors = [
-    { name: 'Jane Doe', expertise: 'Web Development', photo: 'https://source.unsplash.com/random/128x128?woman' },
-    { name: 'John Smith', expertise: 'Data Science', photo: 'https://source.unsplash.com/random/128x128?man' },
-    { name: 'Alice Johnson', expertise: 'UI/UX Design', photo: 'https://source.unsplash.com/random/128x128?designer' },
+    { name: 'Abdellah Ahmed', expertise: 'Lead Developer', photo: '/images/instructors/abdellah.jpg' },
+    { name: 'Fuad Abdella', expertise: 'Project Manager', photo: '/images/instructors/fuad.jpg' },
   ];
 
   return (
@@ -128,8 +127,8 @@ export default function Home() {
 
       {/* Instructor Spotlight */}
       <section className="py-20 px-6 bg-[#EFE3C2]">
-        <h2 className="text-3xl font-bold text-[#123524] text-center mb-8">Instructor Spotlight</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+        <h2 className="text-3xl font-bold text-[#123524] text-center mb-8">Team of Unique</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
           {instructors.map(inst => (
             <div key={inst.name} className="flex flex-col items-center">
               <img src={inst.photo} alt={inst.name} className="w-32 h-32 rounded-full object-cover" />

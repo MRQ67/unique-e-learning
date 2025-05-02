@@ -23,14 +23,21 @@ const authOptions: NextAuthOptions = {
           throw new Error("Missing credentials");
         }
         const user = await prisma.user.findUnique({ where: { email: credentials.email } });
-        if (!user || !user.hashedPassword) {
-          throw new Error("No user found");
+        
+        // If user exists, check password
+        if (user) {
+          if (!user.hashedPassword) {
+            throw new Error("No password found");
+          }
+          const isValid = await bcrypt.compare(credentials.password, user.hashedPassword);
+          if (!isValid) {
+            throw new Error("Incorrect password");
+          }
+          return user;
         }
-        const isValid = await bcrypt.compare(credentials.password, user.hashedPassword);
-        if (!isValid) {
-          throw new Error("Incorrect password");
-        }
-        return user;
+        
+        // If user doesn't exist, return null - we'll handle registration separately
+        return null;
       },
     }),
     GoogleProvider({

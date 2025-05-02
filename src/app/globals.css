@@ -37,19 +37,19 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
-  
+
   --color-contrast-high: #000000;
   --color-contrast-medium: #333333;
   --color-contrast-low: #666666;
-  
+
   --color-success: #00704A;
   --color-warning: #D33F49;
   --color-info: #0052CC;
-  
+
   --color-hover: #F5F5F5;
   --color-focus: #E5E5E5;
   --color-active: #D9D9D9;
-  
+
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);

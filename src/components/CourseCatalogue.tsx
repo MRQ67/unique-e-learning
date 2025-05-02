@@ -22,7 +22,7 @@ export default function CourseCatalogue({ courses, userRole }: { courses: Course
   const [instructorFilter, setInstructorFilter] = useState('all');
 
   const instructors = useMemo(
-    () => ['all', ...Array.from(new Set(courses.map(c => c.instructor.name || 'Unknown')))],
+    () => ['all', ...Array.from(new Set(courses.map(c => c.instructor ? c.instructor.name || 'Unknown' : 'Unknown')))],
     [courses]
   );
 
@@ -31,7 +31,7 @@ export default function CourseCatalogue({ courses, userRole }: { courses: Course
       courses.filter(
         c =>
           (c.title.toLowerCase().includes(search.toLowerCase()) || c.description.toLowerCase().includes(search.toLowerCase())) &&
-          (instructorFilter === 'all' || (c.instructor.name || 'Unknown') === instructorFilter)
+          (instructorFilter === 'all' || (c.instructor ? c.instructor.name || 'Unknown' : 'Unknown') === instructorFilter)
       ),
     [courses, search, instructorFilter]
   );
@@ -73,7 +73,7 @@ export default function CourseCatalogue({ courses, userRole }: { courses: Course
               </CardHeader>
               <CardDescription>{c.description}</CardDescription>
               <CardFooter>
-                Instructor: {c.instructor.name || 'Unknown'} | Duration: {Math.floor(c.duration / 60)}h {c.duration % 60}m
+                Instructor: {c.instructor ? c.instructor.name || 'Unknown' : 'Unknown'} | Duration: {Math.floor(c.duration / 60)}h {c.duration % 60}m
               </CardFooter>
             </Card>
           </li>

@@ -1,7 +1,7 @@
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 import { redirect } from 'next/navigation';
-import Navbar from '@/components/Navbar';
+
 import InstructorSessions from '@/components/InstructorSessions';
 import CourseCreationModal from '@/components/CourseCreationModal';
 import ExamCreationModal from '@/components/ExamCreationModal';
@@ -16,6 +16,16 @@ export const metadata = {
   description: 'Manage your quiz proctoring sessions',
 };
 
+import DashboardLayout from '../layout';
+import { NavItem } from '@/components/ui/types';
+
+const instructorNavItems: NavItem[] = [
+  { href: "/dashboard/instructor", label: "Dashboard" },
+  { href: "/dashboard/instructor/sessions", label: "Proctoring Sessions" },
+  { href: "/courses", label: "Courses" },
+  { href: "/exams", label: "Exams" },
+];
+
 export default async function InstructorDashboardPage() {
   const session = await getServerSession(authOptions);
   if (!session) {
@@ -29,8 +39,7 @@ export default async function InstructorDashboardPage() {
   const examsList = await (prisma as any).exam.findMany({ where: { instructorId: session.user.id } });
 
   return (
-    <>
-      <Navbar title="Instructor Dashboard" />
+    <DashboardLayout navItems={instructorNavItems}>
       <div className="max-w-4xl mx-auto mt-20 space-y-10">
         <section>
           <div className="flex justify-between items-center mb-4">
@@ -67,6 +76,6 @@ export default async function InstructorDashboardPage() {
           </div>
         </section>
       </div>
-    </>
+    </DashboardLayout>
   );
 }

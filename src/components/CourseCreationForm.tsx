@@ -370,11 +370,10 @@ export default function CourseCreationForm({ onSuccess }: CourseCreationFormProp
                 {isLoading ? 'Creating...' : 'Create Course'}
               </Button>
             </div>
-          )}
+            )}
         </div>
 
-        {step === 3 && (
-          <div className="mt-8">
+        {step === 3 && (          <div className="mt-8">
             <h2 className="text-xl font-semibold mb-2">Course Modules</h2>
             {modules.length === 0 ? (
               <div className="text-center py-8 border rounded-lg">

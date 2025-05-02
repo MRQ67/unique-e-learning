@@ -82,63 +82,62 @@ export default function EditCourseModal({ course, onUpdated }: EditCourseModalPr
           Edit
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>Edit Course</DialogTitle>
           <DialogDescription>
-            Update your course information below.
+            Update course information
           </DialogDescription>
         </DialogHeader>
-        
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative" role="alert">
               <span className="block sm:inline">{error}</span>
             </div>
           )}
-          
-          <div className="space-y-2">
-            <Label htmlFor="title">Course Title</Label>
+          <div>
+            <Label htmlFor="title">Title</Label>
             <Input
               id="title"
-              name="title"
+              type="text"
               value={formData.title}
               onChange={handleChange}
+              name="title"
               required
             />
           </div>
-          
-          <div className="space-y-2">
+          <div>
             <Label htmlFor="description">Description</Label>
             <Textarea
               id="description"
-              name="description"
               value={formData.description}
               onChange={handleChange}
-              rows={4}
+              name="description"
               required
             />
           </div>
-          
-          <div className="space-y-2">
+          <div>
             <Label htmlFor="duration">Duration (minutes)</Label>
             <Input
               id="duration"
-              name="duration"
               type="number"
               value={formData.duration}
               onChange={handleChange}
+              name="duration"
               min={1}
               required
             />
           </div>
-          
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => setIsOpen(false)} disabled={isSubmitting}>
               Cancel
             </Button>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Saving...' : 'Save Changes'}
+              {isSubmitting ? (
+                <span className="flex items-center gap-2"><svg className="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>Saving...</span>
+              ) : (
+                'Save Changes'
+              )}
             </Button>
           </DialogFooter>
         </form>

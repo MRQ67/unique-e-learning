@@ -2,12 +2,13 @@ import prisma from "@/lib/prismadb";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import CourseCatalogue, { CourseWithInstructor } from "@/components/CourseCatalogue";
-import Navbar from "@/components/Navbar";
+
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Card, CardHeader, CardContent, CardFooter, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
+import StartExamButton from './StartExamButton';
 
 export const revalidate = 60;
 export const dynamic = 'force-dynamic';
@@ -15,6 +16,16 @@ export const metadata = {
   title: "Student Dashboard",
   description: "Browse courses",
 };
+
+import DashboardLayout from '../layout';
+import { NavItem } from '@/components/ui/types';
+
+const studentNavItems: NavItem[] = [
+  { href: "/dashboard/student", label: "Dashboard" },
+  { href: "/dashboard/student/results", label: "Results" },
+  { href: "/courses", label: "Courses" },
+  { href: "/exams", label: "Exams" },
+];
 
 export default async function StudentDashboardPage() {
   const session = await getServerSession(authOptions);
@@ -32,8 +43,7 @@ export default async function StudentDashboardPage() {
   const activeSessions = examSessions.filter((s: any) => s.proctoringActive);
 
   return (
-    <>
-      <Navbar title="Dashboard" />
+    <DashboardLayout navItems={studentNavItems}>
       <div className="max-w-3xl mx-auto mt-20 px-4 space-y-8">
         <section>
           <h1 className="text-3xl font-bold mb-4">Course Catalogue</h1>
@@ -49,9 +59,7 @@ export default async function StudentDashboardPage() {
                 </CardHeader>
                 {exam.description && <CardContent>{exam.description}</CardContent>}
                 <CardFooter>
-                  <Link href={`/exams/${exam.id}/take`}>
-                    <Button>Start Exam</Button>
-                  </Link>
+                  <StartExamButton examId={exam.id} />
                 </CardFooter>
               </Card>
             ))}
@@ -112,6 +120,6 @@ export default async function StudentDashboardPage() {
           </div>
         </section>
       </div>
-    </>
+    </DashboardLayout>
   );
 }
