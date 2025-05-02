@@ -3,14 +3,36 @@
 import Link from "next/link";
 import NavbarHome from '@/components/NavbarHome';
 import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
-import { BookOpen, BarChart2, Video as VideoIcon } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Progress } from '@radix-ui/react-progress';
+import { TrendingUp, BookOpen, Users, Clock } from 'lucide-react';
+import { BookOpen as BookIcon, BarChart2, Video as VideoIcon } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { VelocityScroll } from "@/components/magicui/scroll-based-velocity";  
 import { LineShadowText } from "@/components/magicui/line-shadow-text";  
 
 import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
+
+interface Course {
+  id: number;
+  title: string;
+  description: string;
+  status: 'completed' | 'in_progress' | 'not_started';
+  progress: number;
+  students: number;
+  nextLesson: string;
+}
+
+interface Exam {
+  id: number;
+  title: string;
+  course: string;
+  status: 'completed' | 'in_progress' | 'not_started';
+  score: number;
+  totalQuestions: number;
+  duration: number;
+}
 
 interface CourseType {
   id: string;
@@ -24,16 +46,101 @@ interface CourseType {
 
 export default function Home() {
   const [searchTerm, setSearchTerm] = useState('');
-  const { data: courses, isLoading } = useQuery<CourseType[]>({
+  const { data: courses, isLoading: isCoursesLoading } = useQuery({
     queryKey: ['courses'],
-    queryFn: () => fetch('/api/courses').then(res => res.json()),
+    queryFn: () => fetch('http://localhost:3000/api/courses').then(res => res.json()),
   });
+
+  const { data: exams, isLoading: isExamsLoading } = useQuery({
+    queryKey: ['exams'],
+    queryFn: () => fetch('http://localhost:3000/api/exams').then(res => res.json()),
+  });
+
+  // Dummy data for development
+  const dummyCourses: Course[] = [
+    {
+      id: 1,
+      title: 'Advanced JavaScript',
+      description: 'Master advanced JavaScript concepts and build complex applications',
+      status: 'in_progress',
+      progress: 65,
+      students: 125,
+      nextLesson: 'Async/Await Patterns'
+    },
+    {
+      id: 2,
+      title: 'React Fundamentals',
+      description: 'Learn the basics of React and build modern web applications',
+      status: 'completed',
+      progress: 100,
+      students: 250,
+      nextLesson: 'Completed'
+    },
+    {
+      id: 3,
+      title: 'Next.js Advanced',
+      description: 'Build production-ready Next.js applications with best practices',
+      status: 'not_started',
+      progress: 0,
+      students: 50,
+      nextLesson: 'Introduction to Next.js'
+    },
+    {
+      id: 4,
+      title: 'TypeScript Essentials',
+      description: 'Learn TypeScript and improve your JavaScript applications',
+      status: 'in_progress',
+      progress: 45,
+      students: 80,
+      nextLesson: 'Type Inference'
+    }
+  ];
+
+  const dummyExams: Exam[] = [
+    {
+      id: 1,
+      title: 'JavaScript Final Exam',
+      course: 'Advanced JavaScript',
+      status: 'in_progress',
+      score: 0,
+      totalQuestions: 20,
+      duration: 60
+    },
+    {
+      id: 2,
+      title: 'React Certification Exam',
+      course: 'React Fundamentals',
+      status: 'completed',
+      score: 95,
+      totalQuestions: 30,
+      duration: 90
+    },
+    {
+      id: 3,
+      title: 'Next.js Assessment',
+      course: 'Next.js Advanced',
+      status: 'not_started',
+      score: 0,
+      totalQuestions: 25,
+      duration: 75
+    },
+    {
+      id: 4,
+      title: 'TypeScript Quiz',
+      course: 'TypeScript Essentials',
+      status: 'in_progress',
+      score: 0,
+      totalQuestions: 15,
+      duration: 45
+    }
+  ];
+
   const filteredCourses = useMemo(() => {
     if (!courses) return [];
-    return courses.filter(c => c.title.toLowerCase().includes(searchTerm.toLowerCase()) || c.category.toLowerCase().includes(searchTerm.toLowerCase()));
+    return courses.filter((c: { title: string; category: string; }) => c.title.toLowerCase().includes(searchTerm.toLowerCase()) || c.category.toLowerCase().includes(searchTerm.toLowerCase()));
   }, [courses, searchTerm]);
   const featuredCourses = useMemo(() => filteredCourses.slice(0, 3), [filteredCourses]);
-  const categories = useMemo(() => (courses ? Array.from(new Set(courses.map(c => c.category))) : []), [courses]);
+  const categories = useMemo(() => (courses ? Array.from(new Set(courses.map((c: { category: any; }) => c.category))) : []), [courses]);
   const instructors = [
     { name: 'Abdellah Ahmed', expertise: 'Lead Developer', photo: '/images/instructors/abdellah.jpg' },
     { name: 'Fuad Abdella', expertise: 'Project Manager', photo: '/images/instructors/fuad.jpg' },
@@ -68,60 +175,30 @@ export default function Home() {
 
       {/* Featured Courses */}
       <section className="py-20 px-6 bg-[#EFE3C2]">
-        <h2 className="text-3xl font-bold text-[#123524] text-center mb-8">Featured Courses</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-          {featuredCourses.map(course => (
-            <Card key={course.id}>
-              <img src={course.image} alt={course.title} className="w-full h-48 object-cover rounded-t-lg" />
-              <CardHeader>
-                <CardTitle>{course.title}</CardTitle>
-                <CardDescription>{course.description}</CardDescription>
-              </CardHeader>
-              <CardFooter>
-                <Link href={`/courses/${course.id}`}>
-                  <Button variant="link">View Course</Button>
-                </Link>
-              </CardFooter>
-            </Card>
-          ))}
-        </div>
-      </section>
-
-      {/* Search Bar */}
-      <section className="py-12 px-6 bg-white">
-        <div className="max-w-xl mx-auto">
-          <input
-            type="text"
-            placeholder="Search courses..."
-            value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
-            className="w-full border border-gray-300 rounded-md p-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#3E7B27]"
-          />
-        </div>
-      </section>
-
-      {/* Value Proposition */}
-      <section className="py-12 px-6 bg-[#f7fafc]">
-        <div className="max-w-3xl mx-auto text-center space-y-4">
-          <p className="text-xl text-[#123524]">Flexible learning anytime, anywhere.</p>
-          <p className="text-xl text-[#123524]">Expert instructors from top universities.</p>
-          <p className="text-xl text-[#123524]">Hands-on projects and real-world examples.</p>
-        </div>
-      </section>
-
-      {/* Categories */}
-      <section className="py-12 px-6 bg-white">
-        <h2 className="text-3xl font-bold text-[#123524] text-center mb-8">Categories</h2>
-        <div className="flex justify-center flex-wrap gap-4">
-          {categories.map(cat => (
-            <button
-              key={cat}
-              onClick={() => setSearchTerm(cat)}
-              className="px-4 py-2 bg-[#85A947] text-white rounded-full"
-            >
-              {cat}
-            </button>
-          ))}
+        <div className="px-4 py-8">
+          <h2 className="text-3xl font-bold mb-8">Featured Courses</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {dummyCourses.map((course) => (
+              <Card key={course.id} className="hover:shadow-lg transition-shadow">
+                <CardHeader className="pb-2">
+                  <div>
+                    <CardTitle className="text-lg">{course.title}</CardTitle>
+                    <p className="text-gray-600 mt-2">{course.description}</p>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-2">
+                  <div className="space-y-4">
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm text-gray-500">Students</p>
+                        <span className="text-sm font-medium">{course.students}</span>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </div>
       </section>
 
