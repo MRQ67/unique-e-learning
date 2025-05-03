@@ -139,16 +139,23 @@ export default function SecureExamTaker({ examId, studentId }: SecureExamTakerPr
   const setupProctoring = async () => {
     let stream: MediaStream | null = null;
     let peerConnection: RTCPeerConnection | null = null;
-let iceCandidateQueue: RTCIceCandidate[] = [];
+    let iceCandidateQueue: RTCIceCandidate[] = [];
     
     try {
-      // Setup webcam
+      // Setup webcam with optimized settings for faster streaming
       if (typeof window === 'undefined' || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         alert('Webcam access is not supported in this environment. Please use a modern browser on your device.');
         throw new Error('getUserMedia not supported');
       }
+      
+      // Optimize video constraints for faster transmission
       stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { width: 640, height: 480, facingMode: 'user' },
+        video: { 
+          width: { ideal: 320, max: 640 },
+          height: { ideal: 240, max: 480 },
+          frameRate: { ideal: 15, max: 24 },
+          facingMode: 'user'
+        },
         audio: false
       });
       
@@ -157,21 +164,21 @@ let iceCandidateQueue: RTCIceCandidate[] = [];
         
         // Notify the server that video is streaming
         if (sessionId) {
-          await fetch('/api/examsessions/events', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-              sessionId, 
-              type: 'video-stream-started' 
-            }),
-          });
+          await logSecurityEvent('video-stream-start');
         }
         
-        // Setup WebRTC for streaming to instructor
+        // Setup WebRTC for streaming to instructor with optimized configuration
         if (window.RTCPeerConnection) {
-          // Create a peer connection
+          // Create a peer connection with optimized STUN/TURN servers
           peerConnection = new RTCPeerConnection({
-            iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+            iceServers: [
+              { urls: 'stun:stun.l.google.com:19302' },
+              { urls: 'stun:stun1.l.google.com:19302' },
+              { urls: 'stun:stun2.l.google.com:19302' }
+            ],
+            iceTransportPolicy: 'all',
+            iceCandidatePoolSize: 10,
+            bundlePolicy: 'max-bundle'
           });
           
           // Add the video tracks to the connection
@@ -179,7 +186,15 @@ let iceCandidateQueue: RTCIceCandidate[] = [];
             if (peerConnection) peerConnection.addTrack(track, stream!);
           });
           
-          // Handle ICE candidates
+          // Set up connection state monitoring
+          peerConnection.onconnectionstatechange = (event) => {
+            console.log(`Connection state: ${peerConnection?.connectionState}`);
+            if (peerConnection?.connectionState === 'connected') {
+              logSecurityEvent('video-feed-received');
+            }
+          };
+          
+          // Handle ICE candidates with priority handling
           peerConnection.onicecandidate = (event) => {
             if (event.candidate && sessionId) {
               // Send ICE candidate to instructor via signaling server
@@ -189,7 +204,8 @@ let iceCandidateQueue: RTCIceCandidate[] = [];
                 body: JSON.stringify({
                   sessionId,
                   type: 'student-ice',
-                  signal: JSON.stringify(event.candidate)
+                  signal: JSON.stringify(event.candidate),
+                  priority: event.candidate.priority
                 })
               });
             }
@@ -238,9 +254,10 @@ let iceCandidateQueue: RTCIceCandidate[] = [];
             }
           };
           
-          // Initial check and then poll every 5 seconds
+          // Initial check and then poll more frequently (every 2 seconds instead of 5)
           checkForOffers();
-          const pollInterval = window.setInterval(checkForOffers, 5000);
+          const pollInterval = window.setInterval(checkForOffers, 2000);
+          
           // Poll for instructor ICE candidates
           const checkForInstructorIce = async () => {
             try {
@@ -416,7 +433,7 @@ let iceCandidateQueue: RTCIceCandidate[] = [];
     <div className="min-h-screen flex flex-col">
       {/* Header with PROCTOR X logo */}
       <header className="border-b border-gray-200 py-4 px-6">
-        <div className="font-semibold text-lg">PROCTOR X</div>
+        <div className="font-semibold text-lg">Unique's Proctored Exam</div>
       </header>
       
       <main className="flex-1 flex">

@@ -165,12 +165,41 @@ export default function ProctoringDashboard({ sessionId }: ProctoringDashboardPr
                             .find(s => s.id === selectedStudent)
                             ?.events
                             .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-                            .map((event) => (
-                              <li key={event.id} className="text-sm">
-                                <span className="font-medium">{event.type === 'face-lost' ? 'Face not detected' : event.type === 'tab-switch' ? 'Tab switching detected' : event.type}</span>
-                                <span className="text-gray-500 ml-2">{new Date(event.timestamp).toLocaleTimeString()}</span>
-                              </li>
-                            ))}
+                            .filter(event => [
+                              'face-lost', 
+                              'tab-switch', 
+                              'video-stream-start', 
+                              'video-feed-received',
+                              'violation'
+                            ].includes(event.type))
+                            .map((event) => {
+                              let displayText = '';
+                              switch(event.type) {
+                                case 'face-lost':
+                                  displayText = 'Face not detected';
+                                  break;
+                                case 'tab-switch':
+                                  displayText = 'Tab switching detected';
+                                  break;
+                                case 'video-stream-start':
+                                  displayText = 'Video streaming started';
+                                  break;
+                                case 'video-feed-received':
+                                  displayText = 'Video feed received';
+                                  break;
+                                case 'violation':
+                                  displayText = 'Security violation';
+                                  break;
+                                default:
+                                  displayText = event.type;
+                              }
+                              return (
+                                <li key={event.id} className="text-sm">
+                                  <span className="font-medium">{displayText}</span>
+                                  <span className="text-gray-500 ml-2">{new Date(event.timestamp).toLocaleTimeString()}</span>
+                                </li>
+                              );
+                            })}
                         </ul>
                       ) : (
                         <p className="text-sm text-gray-500">No events recorded</p>
